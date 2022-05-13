@@ -6,15 +6,25 @@ from API.models import Report
 
 class ReportView(APIView):
     def get(self, request):
-        reports = Report.objects.all()
+        q = request.query_params
+        page, count, name, group = int(q.get('page')), int(q.get('count')), q.get('name'), q.get('group')
+        if name == None and group == None:
+            reports = Report.objects.all()
+            serializer = ReportSerializer(reports, many=True)
+            count_reports = Report.objects.all().count()
+            print(reports, count_reports)
+            return Response(serializer.data)
+        reports = Report.objects.filter(name = name, group = group)[(page-1)*count:page*count]
         serializer = ReportSerializer(reports, many=True)
+        count_reports = Report.objects.filter(name = name, group = group).count()
+        print(page, count, name, group, count_reports)        
         return Response(serializer.data)
 
     def post(self, request):
-        for report in request.data.reports:
+        for report in request.data.get('reports'):
             newReport = ReportSerializer(data=report)
-            if newReport.is_valid():
-                newReport.save()
+            print(newReport)
+            newReport.save()
         return Response({"success": True})
     
     def delete(self, request):
