@@ -17,8 +17,7 @@ class ReportView(APIView):
         if name == None: name = ""
         reports = Report.objects.filter(name__icontains = name, group__icontains = group)[(page-1)*count:page*count]
         serializer = ReportSerializer(reports, many=True)
-        count_reports = Report.objects.filter(name__icontains = name, group__icontains = group).count()
-        print(page, count, name, group, count_reports)        
+        count_reports = Report.objects.filter(name__icontains = name, group__icontains = group).count()     
         return Response({"reports":serializer.data,"count": count_reports})
 
     def post(self, request):
@@ -31,8 +30,7 @@ class ReportView(APIView):
     def delete(self, request):
         for report in request.data.get("reports"):
             report_model = Report.objects.get(reportId=report.get("reportId"))
-            report_serializer = ReportSerializer(report_model)
-            report_serializer.delete()
+            report_model.delete()
         return Response({"success": True})
    
     def put(self, request):
